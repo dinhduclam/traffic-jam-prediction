@@ -111,15 +111,12 @@ with open(vehicle_file) as json_file:
     #                 checked.add(v[i])
 
     for v in new_vehicles:
-        checked = set()
-        for i, vi in enumerate(v):
-            if vi.id not in checked:
-                duration = 0
-                for j, vj in enumerate(v[i+1:], start=i+1):
-                    if vi.id == vj.id and vi.pos == vj.pos:
-                        duration += 0.1
-                        vj.duration = duration
-                        checked.add(vi.id)
+        duration = 0
+        for i in range(1, len(v)):
+            if v[i].pos == v[i-1].pos:
+                duration += 0.1
+        print(v[0].id, duration)
+
 
     # for v in new_vehicles:
     #     for e in v:
@@ -153,7 +150,7 @@ def export_data():
         for l in lanes:
             if v.lane == l.id:
                 v.lane = l.type
-                v.condition = l.speed
+                v.condition = "smooth"
                 
 
     for v in vehicles:
