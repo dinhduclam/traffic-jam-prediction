@@ -4,7 +4,7 @@ import csv
 net_file = './data/net.json'
 vehicle_file = './data/vehicle.json'
 
-
+# Define class lane
 class lane:
     def __init__(self, _id, _type, _speed, _length, _shape):
         self.id = _id
@@ -45,6 +45,7 @@ with open(net_file) as json_file:
                 lanes.append(lane(j['id'], 'highway.normal', j['speed'], j['length'], j['shape']))
             print("Not have key type")
 
+# Define class vehicle
 class vehicle:
     def __init__(self, _time, _id, _x, _y, _angle, _speed, _pos, _lane, _duration, _condition, _event):
         self.time = _time
