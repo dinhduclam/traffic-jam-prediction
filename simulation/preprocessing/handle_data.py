@@ -43,12 +43,9 @@ with open(net_file) as json_file:
                 j = i['lane']                    
                 lanes.append(lane(j['id'], 'highway.normal', j['speed'], j['length'], j['shape']))
             print("Not have key type")
-        
-    # for l in lanes:
-    #     print(l.id)
 
 class vehicle:
-    def __init__(self, _time, _id, _x, _y, _angle, _speed, _pos, _lane, _duration, _condition):
+    def __init__(self, _time, _id, _x, _y, _angle, _speed, _pos, _lane, _duration, _condition, _event):
         self.time = _time
         self.id = _id
         self.x = _x
@@ -59,6 +56,7 @@ class vehicle:
         self.lane = _lane
         self.duration = _duration
         self.condition = _condition
+        self.event = _event
 
     def display(self):
         print(f"Time: {self.time}, id: {self.id}, X: {self.x}, Y: {self.y}, Angle: {self.angle}, Speed: {self.speed}, Position: {self.pos}, Lane: {self.lane}, Duration: {self.duration}, Condition: {self.condition}")
@@ -75,11 +73,11 @@ with open(vehicle_file) as json_file:
             for j in i['vehicle']:
                 vehicles.append(vehicle(i['time'], j['id'], j['x'], j['y'], 
                        j['angle'], j['speed'], j['pos'], 
-                       j['lane'], 0.0, "None"))
+                       j['lane'], 0.0, "None", "None"))
         elif (type(i['vehicle']) == dict):
             vehicles.append(vehicle(i['time'], i['vehicle']['id'], i['vehicle']['x'], i['vehicle']['y'], 
                        i['vehicle']['angle'], i['vehicle']['speed'], i['vehicle']['pos'], 
-                       i['vehicle']['lane'], 0.0, "None"))
+                       i['vehicle']['lane'], 0.0, "None", "None"))
 
     new_vehicles = []
 
@@ -101,28 +99,16 @@ with open(vehicle_file) as json_file:
 
             new_vehicles.append(temps)
 
-    # for v in new_vehicles:
-    #     checked = set()
-    #     for i in range(0, len(v)):
-    #         for j in range(i + 1, len(v)):
-    #             timestep = round (float(v[j].time) - float(v[i].time), 2)
-    #             if timestep == 0.1 and v[i].id == v[j].id and v[i].pos == v[j].pos and v[i].id not in checked:
-    #                 v[j].duration = round(float (v[j].time) - float(v[i].time), 2)
-    #                 checked.add(v[i])
-
+    # Calculate duration and set congestion event
     for v in new_vehicles:
         duration = 0
         for i in range(1, len(v)):
             if v[i].pos == v[i-1].pos:
                 duration += 0.1
+                v[i].duration = duration
+                if duration > 5:
+                    v[i].event = "congestion"
         print(v[0].id, duration)
-
-
-    # for v in new_vehicles:
-    #     for e in v:
-    #         if e.duration != 0:
-    #             e.display()
-    
 
 
 class export: 
@@ -154,13 +140,13 @@ def export_data():
                 
 
     for v in vehicles:
-        exports.append(export(v.id, v.time, v.x, v.y, v.speed, v.duration, v.lane, v.condition, "None"))
+        exports.append(export(v.id, v.time, v.x, v.y, v.speed, v.duration, v.lane, v.condition, v.event))
 
     f = open('./data.csv', 'w')
 
     writer = csv.writer(f)
 
-    writer.writerow(["Node", "Timestamp", "Latitudes", "Longtitudes", "Velocity", "Duration", "Road Type", "Road Condition", "Road Event"])
+    writer.writerow(["Node", "Timestamp", "X", "Y", "Velocity", "Duration", "Road Type", "Road Condition", "Road Event"])
 
     for ve in exports:
         writer.writerow(ve.get_row())
