@@ -18,6 +18,7 @@ class lane:
 
 lanes = []
 
+# Load data from json file and create vehicle array
 with open(net_file) as json_file:
     data = json.load(json_file)
     
