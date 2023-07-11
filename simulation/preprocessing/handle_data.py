@@ -1,6 +1,7 @@
 import json
 import csv
 import datetime
+import time
 
 net_file = './data/net.json'
 vehicle_file = './data/vehicle.json'
@@ -122,7 +123,7 @@ with open(vehicle_file) as json_file:
 
         for i in range(0, len(v)):
             seconds = float(v[i].time)
-            start_date = datetime.datetime(2023, 1, 1, 17, 0, 0)
+            start_date = datetime.datetime(2023, 1, 3, 17, 0, 0)
             time_delta = datetime.timedelta(seconds=seconds)
             end_date = start_date + time_delta
 
@@ -186,7 +187,7 @@ def export_data():
 
     writer = csv.writer(f)
 
-    writer.writerow(["Node", "Timestamp", "X", "Y", "Velocity", "Duration", "Road Type", "Road Condition", "Road Event", "Hour", "Minute", "Second", "Day Of Week", "Day", "Month", "Year"])
+    writer.writerow(["Node", "Timestamp", "X", "Y", "Velocity", "Duration", "Road Type", "Road Condition", "Road Event", "Hour", "Minute", "Day Of Week", "Day", "Month", "Year"])
 
     for ve in exports:
         writer.writerow(ve.get_row())
@@ -194,4 +195,8 @@ def export_data():
     # for e in exports:
     #     e.display()
 
+start = time.time()
 export_data()
+end = time.time()
+print("The time of execution of above program is :",
+      (end-start) * 10**3, "ms")
