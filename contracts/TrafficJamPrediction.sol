@@ -51,14 +51,17 @@ contract TrafficJamPrediction {
     mapping(string => mapping(address => bool)) public incidentConfirm;
 
     uint public incidentCount;
-    uint public tokenReward;
+    uint256 public tokenReward;
+    uint256 public minimunTokenGetProbability;
+
 
     event IncidentShared(string indexed incidentHash, Incident incident);
     event IncidentConfirm(string indexed incidentHash, address user);
 
     constructor() {
         incidentCount = 0;
-        tokenReward = 10; // Adjust the token reward as needed
+        tokenReward = 0.0001 ether;
+        minimunTokenGetProbability = 0.000001 ether;
     }
 
     function createAccount() external {
@@ -74,7 +77,7 @@ contract TrafficJamPrediction {
         RoadCondition _roadCondition,
         RoadEvent _event,
         uint256 _timestamp
-    ) external {
+    ) external payable{
         require(accounts[msg.sender], "Account does not exist");
 
         uint256 currentTimestamp = _timestamp == 0 ? block.timestamp : _timestamp;
@@ -110,6 +113,10 @@ contract TrafficJamPrediction {
         else{
             incidents[incidentHash].confirmNumber++;
             incidentConfirm[incidentHash][msg.sender] = true;
+            if (incidents[incidentHash].confirmNumber == 5){
+                // address payable firstUser = payable(incidents[incidentHash].firstUser);
+                // firstUser.transfer(tokenReward);
+            }
             emit IncidentConfirm(incidentHash, msg.sender);
         }
     }
@@ -119,15 +126,19 @@ contract TrafficJamPrediction {
         view
         returns (Incident memory incident)
     {
+        require(accounts[msg.sender], "Account does not exist");
         incident = incidents[hash];
         return incident;
     }
 
     function getTrafficJamProbability()
         external
-        pure
+        payable
         returns (uint probability)
     {
+        require(accounts[msg.sender], "Account does not exist");
+        require(msg.value >= minimunTokenGetProbability, "Insufficient Ether sent");
+
         probability = calculateProbability();
         return probability;
     }
