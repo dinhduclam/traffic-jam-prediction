@@ -131,7 +131,9 @@ contract TrafficJamPrediction {
         return incident;
     }
 
-    function getTrafficJamProbability()
+    function getTrafficJamProbability(
+        string memory _roadId,
+        uint256 _timestamp)
         external
         payable
         returns (uint probability)

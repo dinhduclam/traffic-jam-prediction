@@ -28,7 +28,7 @@ class TrafficJamPrediction {
             } catch (error) {
                 throw new Error(`Get account address from MetaMask fail! ${error.message}`)
             }
-          }
+        }
     }
 
     shareIncident = async function(latitude, longitude, roadType, roadCondition, event){
