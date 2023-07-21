@@ -11279,3 +11279,18 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+
+.form-group .input-datetime-picker {
+  padding: 6px;
+  padding-left: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+#datetime {
+  border: none;
+
+  &:focus-visible{
+    outline: none;
+  }
+}

@@ -80,7 +80,7 @@ contract TrafficJamPrediction {
         RoadCondition _roadCondition,
         RoadEvent _event,
         uint256 _timestamp
-    ) external payable{
+    ) external payable returns(Incident memory incident){
         require(accounts[msg.sender], "Account does not exist");
 
         uint256 timestamp = _timestamp == 0 ? block.timestamp : _timestamp;
@@ -88,12 +88,12 @@ contract TrafficJamPrediction {
         uint _timeslot = calculateTimeslot(timestamp);
         uint _day = calculateDay(timestamp);
         
-        string memory hash = incidentHash(_roadId, _day, _timeslot);
+        string memory iHash = incidentHash(_roadId, _day, _timeslot);
 
-        require(incidentConfirm[hash][msg.sender] == false, "You already share this incident");
+        require(incidentConfirm[iHash][msg.sender] == false, "You already share this incident");
         //TODO: Check unique incident
-        if (!incidentExist[hash]) {
-            incidents[hash] = Incident({
+        if (!incidentExist[iHash]) {
+            incidents[iHash] = Incident({
                 location: Location({
                     latitude: _latitude,
                     longitude: _longitude
@@ -107,28 +107,30 @@ contract TrafficJamPrediction {
                 firstUser: msg.sender,
                 confirmNumber: 0
             });
-            incidentExist[hash] = true;
-            incidentConfirm[hash][msg.sender] = true;
-            emit IncidentShared(hash, incidents[hash]);
+            incidentExist[iHash] = true;
+            incidentConfirm[iHash][msg.sender] = true;
+            emit IncidentShared(iHash, incidents[iHash]);
         }
         else{
-            incidents[hash].confirmNumber++;
-            incidentConfirm[hash][msg.sender] = true;
-            if (incidents[hash].confirmNumber == 3){
-                address payable firstUser = payable(incidents[hash].firstUser);
+            incidents[iHash].confirmNumber++;
+            incidentConfirm[iHash][msg.sender] = true;
+            if (incidents[iHash].confirmNumber == 3){
+                address payable firstUser = payable(incidents[iHash].firstUser);
                 firstUser.transfer(tokenReward);
             }
-            emit IncidentConfirm(hash, msg.sender);
+            emit IncidentConfirm(iHash, msg.sender);
         }
+
+        return incidents[iHash];
     }
 
-    function getIncident(string memory hash)
+    function getIncident(string memory iHash)
         public  
         view
         returns (Incident memory incident)
     {
         require(accounts[msg.sender], "Account does not exist");
-        incident = incidents[hash];
+        incident = incidents[iHash];
         return incident;
     }
 
@@ -147,21 +149,21 @@ contract TrafficJamPrediction {
         uint _timeslot = calculateTimeslot(timestamp);
         uint _day = calculateDay(timestamp);
 
-        string memory hash = incidentHash(_roadId, _day, _timeslot);
-        return getIncident(hash);
+        string memory iHash = incidentHash(_roadId, _day, _timeslot);
+        return getIncident(iHash);
     }
 
     function incidentHash(
         string memory _roadId,
         uint _day,
         uint _timeslot
-    ) internal pure returns (string memory hash)
+    ) internal pure returns (string memory iHash)
     {
-        hash = _roadId;
-        hash = string.concat(hash, "_");
-        hash = string.concat(hash, uintToString(_timeslot));
-        hash = string.concat(hash, "_");
-        hash = string.concat(hash, uintToString(_day));
+        iHash = _roadId;
+        iHash = string.concat(iHash, "_");
+        iHash = string.concat(iHash, uintToString(_timeslot));
+        iHash = string.concat(iHash, "_");
+        iHash = string.concat(iHash, uintToString(_day));
     }
 
     uint256 constant TIMESLOT_DURATION = 30 minutes;
