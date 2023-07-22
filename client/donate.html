@@ -44,7 +44,7 @@
 
             <hr class="sidebar-divider my-0">
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="donate.html">
                     <i class="fas fa-fw fa-donate"></i>
                     <span>Donate</span></a>
@@ -64,7 +64,7 @@
                     <span>Share incident</span></a>
             </li>
 
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="get-probability.html">
                     <i class="fas fa-fw fa-traffic-light"></i>
                     <span>Get traffic jam probability</span></a>
@@ -140,7 +140,7 @@
                                         <input type="datetime-local" id="datetime" name="datetime">
                                     </div>
                                 </div>
-                                <button class="btn btn-primary" onclick="addProposal()">Submit</button>
+                                <button class="btn btn-primary" onclick="shareIncident()">Submit</button>
                             </div>
                         </div>
                         
@@ -148,76 +148,26 @@
                     
                     <script>
                         window.addEventListener('load', (event) => {
-                            initFirebase();
                             console.log('The page has fully loaded');
                         });
-                        function initFirebase(){
-                            const firebaseConfig = {
-                              apiKey: "AIzaSyBSF4DTIfBAs1B9OkVSmdSXKkx2FIGFpqU",
-                              authDomain: "voting-system-94342.firebaseapp.com",
-                              projectId: "voting-system-94342",
-                              storageBucket: "voting-system-94342.appspot.com",
-                              messagingSenderId: "390102264210",
-                              appId: "1:390102264210:web:0a35051ec937ecc635f94b",
-                              measurementId: "G-DJB7NYKSB4"
-                            };
-                          
-                            // Initialize Firebase
-                            const app = firebase.initializeApp(firebaseConfig);
-                            const db = firebase.firestore();
-                            console.log(app)
-                        }
-                        async function getCountDocument(nameCollection){
-                            console.log("start 0")
-                            var count=0;
-                            const db = firebase.firestore();
-                            return await db.collection(nameCollection)
-                            .get()
-                            .then(snap => {
-                                snap.forEach(doc => {
-                                    count++;
-                                    });
-                                return count;  
-                            });
-                            
-                        }
-                        async function addProposal(){
-                            const name = $('#proposalName').val();
-                            const age = parseInt($('#proposalAge').val());
 
-                            if (!name) {
-                                alert("Proposal name is not empty");
-                                return;
-                            }
+                        async function shareIncident(){
+                            const roadId = $('#roadId').val();
+                            const roadType = parseInt($('#roadType').val());
+                            const roadCondition = parseInt($('#roadCondition').val());
+                            const roadEvent = parseInt($('#roadEvent').val());
+                            const datetime = new Date($('#datetime').val());
+                            const timestamp = datetime.getTime();
 
-                            if (!age){
-                                alert("Proposal age is not empty");
-                                return;
-                            }
+                            console.log(roadId, roadType, roadCondition, roadEvent, timestamp)
 
-                            console.log(name, age)
-
-                            const result = await Ballot.addProposal(name, age);
-                        
+                            const latitude = 1;
+                            const longitude = 1;
+                            const result = await TrafficJamPrediction.shareIncident(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp);
+                            console.log(result);
                             alert(result.message);
-                            if(result.success){
-                                const db = firebase.firestore()
-                            // add data voters to firebase
-                            var countId = await getCountDocument("proposals");
-                            await db.collection("proposals").add({
-                                id :  countId+1,
-                                name : name,
-                                age : age,
-
-                            }).then(() => {
-                                console.log("Data saved")
-                            }).catch((error) => {
-                                console.log(error)
-                            })
-                            }
-                            window.location.reload();
-
                         }
+
                     </script>
                     
             </div>

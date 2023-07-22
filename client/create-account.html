@@ -51,14 +51,14 @@
             </li>
 
             <hr class="sidebar-divider my-0">
-
-            <li class="nav-item">
+            
+            <li class="nav-item active">
                 <a class="nav-link" href="create-account.html">
                     <i class="fas fa-fw fa-wallet"></i>
                     <span>Create account</span></a>
             </li>
 
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="share-incident.html">
                     <i class="fas fa-car-crash"></i>
                     <span>Share incident</span></a>
@@ -97,50 +97,16 @@
                         </div>
                         <div class="card-body">
                             <div>
+                                
                                 <div class="form-group">
-                                    <label for="roadId">Road Id</label>
-                                    <input type="text" class="form-control" id="roadId" placeholder="Enter Road Id">
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadType">Road Type</label>
-                                    <select id="roadType" name="roadType" class="form-select">
-                                        <option selected value="1">Expressway</option>
-                                        <option value="2">NationalHighway</option>
-                                        <option value="3">StateHighway</option>
-                                        <option value="4">MajorDistrictRoad</option>
-                                        <option value="5">OtherDistrictRoad</option>
-                                        <option value="6">RuralRoad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadCondition">Road Condition</label>
-                                    <select id="roadCondition" name="roadCondition" class="form-select">
-                                        <option selected value="1">Smooth</option>
-                                        <option value="2">Moderate</option>
-                                        <option value="3">Poor</option>
-                                        <option value="4">ExtremelyBad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadEvent">Road Event</label>
-                                    <select id="roadEvent" name="roadEvent" class="form-select">
-                                        <option selected value="1">Construction</option>
-                                        <option value="2">Accident</option>
-                                        <option value="3">Barricades</option>
-                                        <option value="4">TollBooth</option>
-                                        <option value="5">DemonstrationsOrProtests</option>
-                                        <option value="6">Marathon</option>
-                                        <option value="7">Others</option>
+                                    <label for="vehicleType">Type of your vehice</label>
+                                    <select id="vehicleType" name="vehicleType" class="form-select">
+                                        <option selected value="1">Car</option>
+                                        <option value="2">Truck</option>
+                                        <option value="3">Motor</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label for="datetime">Datetime</label>
-                                    
-                                    <div class='input-datetime-picker'>
-                                        <input type="datetime-local" id="datetime" name="datetime">
-                                    </div>
-                                </div>
-                                <button class="btn btn-primary" onclick="shareIncident()">Submit</button>
+                                <button class="btn btn-primary" onclick="createAccount()">Submit</button>
                             </div>
                         </div>
                         
@@ -151,23 +117,10 @@
                             console.log('The page has fully loaded');
                         });
 
-                        async function shareIncident(){
-                            const roadId = $('#roadId').val();
-                            const roadType = parseInt($('#roadType').val());
-                            const roadCondition = parseInt($('#roadCondition').val());
-                            const roadEvent = parseInt($('#roadEvent').val());
-                            const datetime = new Date($('#datetime').val());
-                            const timestamp = datetime.getTime();
-
-                            console.log(roadId, roadType, roadCondition, roadEvent, timestamp)
-
-                            const latitude = 1;
-                            const longitude = 1;
-                            const result = await TrafficJamPrediction.shareIncident(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp);
-                            console.log(result);
+                        async function createAccount(){
+                            const result = await TrafficJamPrediction.createAccount();
                             alert(result.message);
                         }
-
                     </script>
                     
             </div>
