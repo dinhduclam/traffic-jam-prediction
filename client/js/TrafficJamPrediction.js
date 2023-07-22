@@ -1,5 +1,5 @@
 TrafficJamPrediction = new function TrafficJamPrediction(){
-    this.contractAdress = '0x43933D410651385B67AFEbc3097882a254254b79'
+    this.contractAdress = '0x86e136B6cB361D501792C7e74d44085a50DefC91'
     this.provider = 'ws://localhost:7545'
     this.maxGas = 1000000
     this.contract = null
@@ -86,6 +86,39 @@ TrafficJamPrediction = new function TrafficJamPrediction(){
                     const response = {
                         success: false,
                         message: `Create account fail! ${err.message}`
+                    };
+
+                    return response;
+                });
+
+        return response;
+    }
+
+    this.donate = async function(amount){
+        if (typeof this.contract == 'undefined'){
+            const response = {
+                success: false,
+                message: `Create account fail! Contract is not defined`
+            };
+            return response;
+        }
+
+        sender = await this.getAccount();
+        var response = await this.contract.methods
+                .donate()
+                .send({from: sender, value: amount*1000000000000000000})
+                .then(_ => {
+                    const response = {
+                        success: true,
+                        message: `Thanks for your donation!`
+                    };
+
+                    return response;
+                })
+                .catch(err => {
+                    const response = {
+                        success: false,
+                        message: `Donate fail! ${err.message}`
                     };
 
                     return response;

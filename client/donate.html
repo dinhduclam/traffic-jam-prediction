@@ -93,54 +93,15 @@
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Share incident</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Donate</h6>
                         </div>
                         <div class="card-body">
                             <div>
                                 <div class="form-group">
-                                    <label for="roadId">Road Id</label>
-                                    <input type="text" class="form-control" id="roadId" placeholder="Enter Road Id">
+                                    <label for="amount">Donate (Ether)</label>
+                                    <input type="number" class="form-control" id="amount" placeholder="Enter number of Ether">
                                 </div>
-                                <div class="form-group">
-                                    <label for="roadType">Road Type</label>
-                                    <select id="roadType" name="roadType" class="form-select">
-                                        <option selected value="1">Expressway</option>
-                                        <option value="2">NationalHighway</option>
-                                        <option value="3">StateHighway</option>
-                                        <option value="4">MajorDistrictRoad</option>
-                                        <option value="5">OtherDistrictRoad</option>
-                                        <option value="6">RuralRoad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadCondition">Road Condition</label>
-                                    <select id="roadCondition" name="roadCondition" class="form-select">
-                                        <option selected value="1">Smooth</option>
-                                        <option value="2">Moderate</option>
-                                        <option value="3">Poor</option>
-                                        <option value="4">ExtremelyBad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadEvent">Road Event</label>
-                                    <select id="roadEvent" name="roadEvent" class="form-select">
-                                        <option selected value="1">Construction</option>
-                                        <option value="2">Accident</option>
-                                        <option value="3">Barricades</option>
-                                        <option value="4">TollBooth</option>
-                                        <option value="5">DemonstrationsOrProtests</option>
-                                        <option value="6">Marathon</option>
-                                        <option value="7">Others</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="datetime">Datetime</label>
-                                    
-                                    <div class='input-datetime-picker'>
-                                        <input type="datetime-local" id="datetime" name="datetime">
-                                    </div>
-                                </div>
-                                <button class="btn btn-primary" onclick="shareIncident()">Submit</button>
+                                <button class="btn btn-primary" onclick="donate()">Donate</button>
                             </div>
                         </div>
                         
@@ -151,20 +112,11 @@
                             console.log('The page has fully loaded');
                         });
 
-                        async function shareIncident(){
-                            const roadId = $('#roadId').val();
-                            const roadType = parseInt($('#roadType').val());
-                            const roadCondition = parseInt($('#roadCondition').val());
-                            const roadEvent = parseInt($('#roadEvent').val());
-                            const datetime = new Date($('#datetime').val());
-                            const timestamp = datetime.getTime();
+                        async function donate(){
+                            const amount = $('#amount').val();
 
-                            console.log(roadId, roadType, roadCondition, roadEvent, timestamp)
-
-                            const latitude = 1;
-                            const longitude = 1;
-                            const result = await TrafficJamPrediction.shareIncident(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp);
-                            console.log(result);
+                            const result = await TrafficJamPrediction.donate(amount);
+                            
                             alert(result.message);
                         }
 
