@@ -87,13 +87,13 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
-                        <h1 class="h3 mb-0 text-gray-800">Share incident</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Traffic Jam Prediction Probability</h1>
                     </div>
 
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Share incident</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Get prediction</h6>
                         </div>
                         <div class="card-body">
                             <div>
@@ -101,38 +101,7 @@
                                     <label for="roadId">Road Id</label>
                                     <input type="text" class="form-control" id="roadId" placeholder="Enter Road Id">
                                 </div>
-                                <div class="form-group">
-                                    <label for="roadType">Road Type</label>
-                                    <select id="roadType" name="roadType" class="form-select">
-                                        <option selected value="1">Expressway</option>
-                                        <option value="2">NationalHighway</option>
-                                        <option value="3">StateHighway</option>
-                                        <option value="4">MajorDistrictRoad</option>
-                                        <option value="5">OtherDistrictRoad</option>
-                                        <option value="6">RuralRoad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadCondition">Road Condition</label>
-                                    <select id="roadCondition" name="roadCondition" class="form-select">
-                                        <option selected value="1">Smooth</option>
-                                        <option value="2">Moderate</option>
-                                        <option value="3">Poor</option>
-                                        <option value="4">ExtremelyBad</option>
-                                      </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="roadEvent">Road Event</label>
-                                    <select id="roadEvent" name="roadEvent" class="form-select">
-                                        <option selected value="1">Construction</option>
-                                        <option value="2">Accident</option>
-                                        <option value="3">Barricades</option>
-                                        <option value="4">TollBooth</option>
-                                        <option value="5">DemonstrationsOrProtests</option>
-                                        <option value="6">Marathon</option>
-                                        <option value="7">Others</option>
-                                    </select>
-                                </div>
+                                
                                 <div class="form-group">
                                     <label for="datetime">Datetime</label>
                                     
@@ -140,7 +109,7 @@
                                         <input type="datetime-local" id="datetime" name="datetime">
                                     </div>
                                 </div>
-                                <button class="btn btn-primary" onclick="addProposal()">Submit</button>
+                                <button class="btn btn-primary" onclick="getTrafficJamProbability()">Prediction</button>
                             </div>
                         </div>
                         
@@ -148,74 +117,18 @@
                     
                     <script>
                         window.addEventListener('load', (event) => {
-                            initFirebase();
                             console.log('The page has fully loaded');
                         });
-                        function initFirebase(){
-                            const firebaseConfig = {
-                              apiKey: "AIzaSyBSF4DTIfBAs1B9OkVSmdSXKkx2FIGFpqU",
-                              authDomain: "voting-system-94342.firebaseapp.com",
-                              projectId: "voting-system-94342",
-                              storageBucket: "voting-system-94342.appspot.com",
-                              messagingSenderId: "390102264210",
-                              appId: "1:390102264210:web:0a35051ec937ecc635f94b",
-                              measurementId: "G-DJB7NYKSB4"
-                            };
-                          
-                            // Initialize Firebase
-                            const app = firebase.initializeApp(firebaseConfig);
-                            const db = firebase.firestore();
-                            console.log(app)
-                        }
-                        async function getCountDocument(nameCollection){
-                            console.log("start 0")
-                            var count=0;
-                            const db = firebase.firestore();
-                            return await db.collection(nameCollection)
-                            .get()
-                            .then(snap => {
-                                snap.forEach(doc => {
-                                    count++;
-                                    });
-                                return count;  
-                            });
-                            
-                        }
-                        async function addProposal(){
-                            const name = $('#proposalName').val();
-                            const age = parseInt($('#proposalAge').val());
-
-                            if (!name) {
-                                alert("Proposal name is not empty");
-                                return;
-                            }
-
-                            if (!age){
-                                alert("Proposal age is not empty");
-                                return;
-                            }
-
-                            console.log(name, age)
-
-                            const result = await Ballot.addProposal(name, age);
                         
-                            alert(result.message);
-                            if(result.success){
-                                const db = firebase.firestore()
-                            // add data voters to firebase
-                            var countId = await getCountDocument("proposals");
-                            await db.collection("proposals").add({
-                                id :  countId+1,
-                                name : name,
-                                age : age,
+                        async function getTrafficJamProbability(){
+                            const roadId = $('#roadId').val();
+                            const datetime = new Date($('#datetime').val());
+                            const timestamp = datetime.getTime();
 
-                            }).then(() => {
-                                console.log("Data saved")
-                            }).catch((error) => {
-                                console.log(error)
-                            })
-                            }
-                            window.location.reload();
+                            const result = await TrafficJamPrediction.getTrafficJamIncident(roadId, timestamp);
+                        
+                            console.log(result)
+                            alert(result.message);
 
                         }
                     </script>

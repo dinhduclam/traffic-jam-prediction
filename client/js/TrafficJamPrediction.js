@@ -1,5 +1,5 @@
 TrafficJamPrediction = new function TrafficJamPrediction(){
-    this.contractAdress = '0x86e136B6cB361D501792C7e74d44085a50DefC91'
+    this.contractAdress = '0x39C315418859b0Acdafd99c8521798A233468e7A'
     this.provider = 'ws://localhost:7545'
     this.maxGas = 1000000
     this.contract = null
@@ -119,6 +119,39 @@ TrafficJamPrediction = new function TrafficJamPrediction(){
                     const response = {
                         success: false,
                         message: `Donate fail! ${err.message}`
+                    };
+
+                    return response;
+                });
+
+        return response;
+    }
+
+    this.getTrafficJamIncident = async function(roadId, timestamp){
+        if (typeof this.contract == 'undefined'){
+            const response = {
+                success: false,
+                message: `Create account fail! Contract is not defined`
+            };
+            return response;
+        }
+
+        sender = await this.getAccount();
+        var response = await this.contract.methods
+                .getTrafficJamIncident(roadId, timestamp).call({from: sender, value: 1*1000000000000000000})
+                .then(data => {
+                    const response = {
+                        success: true,
+                        message: `Successful!`,
+                        data: data
+                    };
+
+                    return response;
+                })
+                .catch(err => {
+                    const response = {
+                        success: false,
+                        message: `Get incident fail! ${err.message}`
                     };
 
                     return response;
