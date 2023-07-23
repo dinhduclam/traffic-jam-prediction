@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-
 contract TrafficJamPrediction {
 
     enum RoadType{
@@ -29,32 +28,39 @@ contract TrafficJamPrediction {
         Others
     }
 
-    struct Location {
-        int256 latitude;
-        int256 longitude;
-    }
-
     struct Incident {
-        Location location;
+        string latitude;
+        string longitude;
+        string roadId;
         RoadType roadType;
         RoadCondition roadCondition;
         RoadEvent roadEvent;
+        uint day;
         uint timeslot;
+        address firstUser;
+        uint confirmNumber;
     }
 
     mapping(address => bool) public accounts;
-    mapping(uint => Incident) public incidents;
-    mapping(uint => bool) public uniqueIncidents;
-    mapping(uint => address) public firstUser;
+    mapping(string => Incident) public incidents;
+    mapping(string => bool) public incidentExist;
+    mapping(string => mapping(address => bool)) public incidentConfirm;
 
     uint public incidentCount;
-    uint public tokenReward;
+    uint256 public tokenReward;
+    uint256 public minimunTokenGetProbability;
 
-    event IncidentShared(uint indexed incidentId, address indexed user, uint timestamp);
 
-    constructor() {
+    event IncidentShared(string indexed incidentHash, Incident incident);
+    event IncidentConfirm(string indexed incidentHash, address user);
+
+    constructor () {
         incidentCount = 0;
-        tokenReward = 10; // Adjust the token reward as needed
+        tokenReward = 2 ether;
+        minimunTokenGetProbability = 1 ether;
+    }
+
+    function donate() external payable  {
     }
 
     function createAccount() external {
@@ -63,51 +69,144 @@ contract TrafficJamPrediction {
     }
 
     function shareIncident(
-        int256 _latitude,
-        int256 _longitude,
+        string memory _latitude,
+        string memory _longitude,
+        string memory _roadId,
         RoadType _roadType,
         RoadCondition _roadCondition,
-        RoadEvent _event
-    ) external {
+        RoadEvent _event,
+        uint256 _timestamp
+    ) external payable returns(Incident memory incident){
         require(accounts[msg.sender], "Account does not exist");
 
-        uint currentTimestamp = block.timestamp;
-        uint incidentId = incidentCount++;
+        uint256 timestamp = _timestamp == 0 ? block.timestamp : _timestamp;
 
-        incidents[incidentId] = Incident({
-            location: Location({
-                latitude: _latitude,
-                longitude: _longitude
-            }),
-            roadType: _roadType,
-            roadCondition: _roadCondition,
-            roadEvent: _event,
-            timeslot: 1 //TODO: calculate timeslot from timestamp
-        });
+        uint _timeslot = calculateTimeslot(timestamp);
+        uint _day = calculateDay(timestamp);
+        
+        string memory iHash = incidentHash(_roadId, _day, _timeslot);
 
+        require(incidentConfirm[iHash][msg.sender] == false, "You already share this incident");
         //TODO: Check unique incident
-        if (!uniqueIncidents[incidentId]) {
-            uniqueIncidents[incidentId] = true;
-            firstUser[incidentId] = msg.sender;
-            emit IncidentShared(incidentId, msg.sender, currentTimestamp);
+        if (!incidentExist[iHash]) {
+            incidents[iHash] = Incident({
+                latitude: _latitude,
+                longitude: _longitude,
+                roadId: _roadId,
+                roadType: _roadType,
+                roadCondition: _roadCondition,
+                roadEvent: _event,
+                day: _day,
+                timeslot: _timeslot,
+                firstUser: msg.sender,
+                confirmNumber: 0
+            });
+            incidentExist[iHash] = true;
+            incidentConfirm[iHash][msg.sender] = true;
+            emit IncidentShared(iHash, incidents[iHash]);
         }
+        else{
+            incidents[iHash].confirmNumber++;
+            incidentConfirm[iHash][msg.sender] = true;
+            if (incidents[iHash].confirmNumber == 1){
+                address payable firstUser = payable(incidents[iHash].firstUser);
+                firstUser.transfer(tokenReward);
+            }
+            emit IncidentConfirm(iHash, msg.sender);
+        }
+
+        return incidents[iHash];
     }
 
-    function getTrafficJamProbability()
+    function getTrafficJamIncident(
+        string memory _roadId,
+        uint256 _timestamp
+        )
         external
-        pure
-        returns (uint probability)
+        payable
+        returns (Incident memory incident)
     {
-        probability = calculateProbability();
-        return probability;
+        require(accounts[msg.sender], "Account does not exist");
+        require(msg.value >= minimunTokenGetProbability, "Insufficient Ether sent");
+
+        uint256 timestamp = _timestamp == 0 ? block.timestamp : _timestamp;
+        uint _timeslot = calculateTimeslot(timestamp);
+        uint _day = calculateDay(timestamp);
+
+        string memory iHash = incidentHash(_roadId, _day, _timeslot);
+        incident = incidents[iHash];
+        return incident;
     }
 
-    function calculateProbability()
-        internal
-        pure
-        returns (uint probability)
+    function incidentHash(
+        string memory _roadId,
+        uint _day,
+        uint _timeslot
+    ) internal pure returns (string memory iHash)
     {
-        probability = 40;
-        return probability;
+        iHash = _roadId;
+        iHash = string.concat(iHash, "_");
+        iHash = string.concat(iHash, uintToString(_timeslot));
+        iHash = string.concat(iHash, "_");
+        iHash = string.concat(iHash, uintToString(_day));
+    }
+
+    uint256 constant TIMESLOT_DURATION = 30 minutes;
+
+    function calculateTimeslot(uint256 _timestamp) internal pure returns (uint) {
+        uint256 secondsInDay = 24 hours;
+        uint256 secondsSinceMidnight = _timestamp % secondsInDay;
+        uint256 timeslot = secondsSinceMidnight / TIMESLOT_DURATION;
+        return timeslot;
+    }
+
+    function calculateDay(uint256 _timestamp) internal pure returns (uint) {
+        uint256 secondsInDay = 24 hours;
+        return _timestamp / secondsInDay;
+    }
+
+    function uintToString(uint v) internal pure returns (string memory str) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            if (remainder == 0){
+                reversed[i++] = '0';
+            }
+            else if (remainder == 1){
+                reversed[i++] = '1';
+            }
+            else if (remainder == 2){
+                reversed[i++] = '2';
+            }
+            else if (remainder == 3){
+                reversed[i++] = '3';
+            }
+            else if (remainder == 4){
+                reversed[i++] = '4';
+            }
+            else if (remainder == 5){
+                reversed[i++] = '5';
+            }
+            else if (remainder == 6){
+                reversed[i++] = '6';
+            }
+            else if (remainder == 7){
+                reversed[i++] = '7';
+            }
+            else if (remainder == 8){
+                reversed[i++] = '8';
+            }
+            else if (remainder == 9){
+                reversed[i++] = '9';
+            }
+        }
+        bytes memory s = new bytes(i);
+        for (uint j = 0; j < i; j++) {
+            s[j] = reversed[i - 1 - j];
+        }
+        str = string(s);
     }
 }
