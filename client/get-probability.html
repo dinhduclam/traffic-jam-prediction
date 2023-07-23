@@ -128,8 +128,50 @@
                             const result = await TrafficJamPrediction.getTrafficJamIncident(roadId, timestamp);
                         
                             console.log(result)
-                            alert(result.message);
+                            if (result.data.roadEvent != 0){
+                                alert(`Have an incident in (${result.data.latitude}, ${result.data.longitude})\nEvent: ${parseEvent(result.data.roadEvent)}\nAnticipated Duration of Slowness: ${result.data.duration} minutes`);
+                            }
+                            else{
+                                var data = {
+                                    "timestamp": 97.0,
+                                    "location": "str",
+                                    "X": 21.007767,
+                                    "Y": 105.841631,
+                                    "velocity": 0.0,
+                                    "duration": 5.6,
+                                    "road_type": "813363002#1_2",
+                                    "road_condition": "str",
+                                    "road_event": "str"
+                                };
 
+                                $.ajax({
+                                    type: "POST",
+                                    url: "http://localhost:8000/predict",
+                                    data: JSON.stringify(data),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function(response) {
+                                        console.log("Response:", response);
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.log("Error:", error);
+                                    }
+                                });
+                            }
+                        }
+
+                        function parseEvent(eventNumber){
+                            eventMap = {
+                                1: "Construction",
+                                2: "Accident",
+                                3: "Barricades",
+                                4: "Toll Booth",
+                                5: "Demonstrations or Protests",
+                                6: "Marathon",
+                                7: "Others"
+                            };
+
+                            return eventMap[eventNumber];
                         }
                     </script>
                     

@@ -176,9 +176,9 @@
                             const roadEvent = parseInt($('#roadEvent').val());
                             const datetime = new Date($('#datetime').val());
                             const timestamp = datetime.getTime();
-                            console.log(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp)
+                            const duration = parseInt($('#slow').val());
                             
-                            const result = await TrafficJamPrediction.shareIncident(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp);
+                            const result = await TrafficJamPrediction.shareIncident(latitude, longitude, roadId, roadType, roadCondition, roadEvent, timestamp, duration);
                             console.log(result);
                             alert(result.message);
                         }

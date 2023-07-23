@@ -37,6 +37,7 @@ contract TrafficJamPrediction {
         RoadEvent roadEvent;
         uint day;
         uint timeslot;
+        uint duration;
         address firstUser;
         uint confirmNumber;
     }
@@ -75,7 +76,8 @@ contract TrafficJamPrediction {
         RoadType _roadType,
         RoadCondition _roadCondition,
         RoadEvent _event,
-        uint256 _timestamp
+        uint256 _timestamp,
+        uint _duration
     ) external payable returns(Incident memory incident){
         require(accounts[msg.sender], "Account does not exist");
 
@@ -98,6 +100,7 @@ contract TrafficJamPrediction {
                 roadEvent: _event,
                 day: _day,
                 timeslot: _timeslot,
+                duration: _duration,
                 firstUser: msg.sender,
                 confirmNumber: 0
             });

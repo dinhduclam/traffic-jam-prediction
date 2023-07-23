@@ -1,5 +1,5 @@
 TrafficJamPrediction = new function TrafficJamPrediction(){
-    this.contractAdress = '0x39C315418859b0Acdafd99c8521798A233468e7A'
+    this.contractAdress = '0x5cDD9f59D68d5496170A2f5446466722Eb9Cbe15'
     this.provider = 'ws://localhost:7545'
     this.maxGas = 1000000
     this.contract = null
@@ -26,7 +26,7 @@ TrafficJamPrediction = new function TrafficJamPrediction(){
         }
     }
 
-    this.shareIncident = async function(latitude, longitude, roadId, roadType, roadCondition, event, timestamp){
+    this.shareIncident = async function(latitude, longitude, roadId, roadType, roadCondition, event, timestamp, duration){
         if (typeof this.contract == 'undefined'){
             const response = {
                 success: false,
@@ -38,7 +38,7 @@ TrafficJamPrediction = new function TrafficJamPrediction(){
 
         sender = await this.getAccount();
         var response = await this.contract.methods
-                    .shareIncident(latitude, longitude, roadId, roadType, roadCondition, event, timestamp)
+                    .shareIncident(latitude, longitude, roadId, roadType, roadCondition, event, timestamp, duration)
                     .send({from: sender, gas: this.maxGas})
                     .then(data => {
                         console.log(data)
