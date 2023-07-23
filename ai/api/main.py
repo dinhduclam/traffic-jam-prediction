@@ -3,6 +3,7 @@ from datetime import datetime
 import joblib
 import numpy as np
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from keras.models import load_model
 
 from data import DataItem, LiveDataItem, HistoricalDataItem
@@ -15,14 +16,26 @@ lbdpe_encoder = joblib.load('.././encoder/ldbpe_encoder_model.pkl')
 hdbpe_model = load_model('.././trained-model/best_historical_cost_model.model')
 ldbpe_model = load_model('.././trained-model/best_live_model.model')
 
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def estimate(item: DataItem):
     # process request
     ldbpe_input = LiveDataItem(timestamp=item.timestamp, average_velocity=item.velocity, average_duration=item.duration,
                                road_type=item.road_type, road_condition=item.road_condition, road_event=item.road_event)
-    timeslot, day_of_week, day_of_month, month_of_year = convert_timestamp(item.timestamp)
-    hbdpe_input = HistoricalDataItem(timestamp=item.timestamp, X=item.X, Y=item.Y, timeslot=timeslot,
-                                     day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
+    # timeslot, day_of_week, day_of_month, month_of_year = convert_timestamp(item.timestamp)
+    hbdpe_input = HistoricalDataItem(timestamp=item.timestamp, X=item.X, Y=item.Y, timeslot=0,
+                                     day_of_week=0, day_of_month=0, month_of_year=0)
     # call the pretrained model and predict
 
     hbdpe_pred = hdbpe_model.predict(hbdpe_input.get_input(hbdpe_scaler))

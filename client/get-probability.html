@@ -133,13 +133,13 @@
                             }
                             else{
                                 var data = {
-                                    "timestamp": 97.0,
+                                    "timestamp": timestamp,
                                     "location": "str",
                                     "X": 21.007767,
                                     "Y": 105.841631,
                                     "velocity": 0.0,
                                     "duration": 5.6,
-                                    "road_type": "813363002#1_2",
+                                    "road_type": roadId,
                                     "road_condition": "str",
                                     "road_event": "str"
                                 };
@@ -151,7 +151,11 @@
                                     contentType: "application/json; charset=utf-8",
                                     dataType: "json",
                                     success: function(response) {
-                                        console.log("Response:", response);
+                                        if (response == 1) {
+                                            alert("Congestion")
+                                        } else {
+                                            alert("No Congestion")
+                                        }
                                     },
                                     error: function(xhr, status, error) {
                                         console.log("Error:", error);

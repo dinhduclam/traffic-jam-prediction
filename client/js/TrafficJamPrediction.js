@@ -1,5 +1,5 @@
 TrafficJamPrediction = new function TrafficJamPrediction(){
-    this.contractAdress = '0x5cDD9f59D68d5496170A2f5446466722Eb9Cbe15'
+    this.contractAdress = '0x5233EA63F4A7178ffEc145ea76b08a469295A8fA'
     this.provider = 'ws://localhost:7545'
     this.maxGas = 1000000
     this.contract = null
