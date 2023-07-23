@@ -28,13 +28,9 @@ contract TrafficJamPrediction {
         Others
     }
 
-    struct Location {
-        int256 latitude;
-        int256 longitude;
-    }
-
     struct Incident {
-        Location location;
+        string latitude;
+        string longitude;
         string roadId;
         RoadType roadType;
         RoadCondition roadCondition;
@@ -60,8 +56,8 @@ contract TrafficJamPrediction {
 
     constructor () {
         incidentCount = 0;
-        tokenReward = 1 ether;
-        minimunTokenGetProbability = 2 ether;
+        tokenReward = 2 ether;
+        minimunTokenGetProbability = 1 ether;
     }
 
     function donate() external payable  {
@@ -73,8 +69,8 @@ contract TrafficJamPrediction {
     }
 
     function shareIncident(
-        int256 _latitude,
-        int256 _longitude,
+        string memory _latitude,
+        string memory _longitude,
         string memory _roadId,
         RoadType _roadType,
         RoadCondition _roadCondition,
@@ -94,10 +90,8 @@ contract TrafficJamPrediction {
         //TODO: Check unique incident
         if (!incidentExist[iHash]) {
             incidents[iHash] = Incident({
-                location: Location({
-                    latitude: _latitude,
-                    longitude: _longitude
-                }),
+                latitude: _latitude,
+                longitude: _longitude,
                 roadId: _roadId,
                 roadType: _roadType,
                 roadCondition: _roadCondition,
@@ -114,7 +108,7 @@ contract TrafficJamPrediction {
         else{
             incidents[iHash].confirmNumber++;
             incidentConfirm[iHash][msg.sender] = true;
-            if (incidents[iHash].confirmNumber == 3){
+            if (incidents[iHash].confirmNumber == 1){
                 address payable firstUser = payable(incidents[iHash].firstUser);
                 firstUser.transfer(tokenReward);
             }
@@ -122,16 +116,6 @@ contract TrafficJamPrediction {
         }
 
         return incidents[iHash];
-    }
-
-    function getIncident(string memory iHash)
-        public  
-        view
-        returns (Incident memory incident)
-    {
-        require(accounts[msg.sender], "Account does not exist");
-        incident = incidents[iHash];
-        return incident;
     }
 
     function getTrafficJamIncident(
@@ -150,7 +134,8 @@ contract TrafficJamPrediction {
         uint _day = calculateDay(timestamp);
 
         string memory iHash = incidentHash(_roadId, _day, _timeslot);
-        return getIncident(iHash);
+        incident = incidents[iHash];
+        return incident;
     }
 
     function incidentHash(
