@@ -1,20 +1,42 @@
 from datetime import datetime
 
+import joblib
 from fastapi import FastAPI
+from keras.models import load_model
 
 from data import DataItem, LiveDataItem, HistoricalDataItem
 
 # create instance of fastapi
 app = FastAPI()
 
+hbdpe_scaler = joblib.load('.././scaler/hbdpe_minmax_model.pkl')
+lbdpe_encoder = joblib.load('.././encoder/ldbpe_encoder_model.pkl')
+print(lbdpe_encoder.transform("813363002#1_2"))
+hdbpe_model = load_model('.././trained-model/best_historical_cost_model.model')
+ldbpe_model = load_model('.././trained-model/best_live_model.model')
+
 
 def estimate(item: DataItem):
     # process request
-    live_data = LiveDataItem(item.velocity, item.duration, item.road_type, item.road_condition, item.road_event)
+    ldbpe_input = LiveDataItem(timestamp=item.timestamp, average_velocity=item.velocity, average_duration=item.duration,
+                               road_type=item.road_type, road_condition=item.road_condition, road_event=item.road_event)
     timeslot, day_of_week, day_of_month, month_of_year = convert_timestamp(item.timestamp)
-    historical_data = HistoricalDataItem(timeslot, day_of_week, day_of_month, month_of_year)
+    hbdpe_input = HistoricalDataItem(timestamp=item.timestamp, X=item.X, Y=item.Y, timeslot=timeslot,
+                                     day_of_week=day_of_week, day_of_month=day_of_month, month_of_year=month_of_year)
     # call the pretrained model and predict
-    result = 0
+
+    hbdpe_pred = hdbpe_model.predict(hbdpe_input.get_input(hbdpe_scaler))
+    p1 = hbdpe_pred.max()
+    print("p1 = ", p1)
+
+    # lbdpe_pred = ldbpe_model.predict(np.array([ldbpe_input.get_input(encoder=lbdpe_encoder)]))
+    # p2 = lbdpe_pred.max()
+    # print(p2)
+    p2 = 0.5
+    print("p2 = ", p2)
+    result = (p1 * p2) / ((p1 * p2) + (1 - p1) * (1 - p2))
+    print("result = ", result)
+    result = 0 if result < 0.5 else 1
     return result
 
 
