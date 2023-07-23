@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import joblib
+import numpy as np
 from fastapi import FastAPI
 from keras.models import load_model
 
@@ -11,7 +12,6 @@ app = FastAPI()
 
 hbdpe_scaler = joblib.load('.././scaler/hbdpe_minmax_model.pkl')
 lbdpe_encoder = joblib.load('.././encoder/ldbpe_encoder_model.pkl')
-print(lbdpe_encoder.transform("813363002#1_2"))
 hdbpe_model = load_model('.././trained-model/best_historical_cost_model.model')
 ldbpe_model = load_model('.././trained-model/best_live_model.model')
 
@@ -29,10 +29,8 @@ def estimate(item: DataItem):
     p1 = hbdpe_pred.max()
     print("p1 = ", p1)
 
-    # lbdpe_pred = ldbpe_model.predict(np.array([ldbpe_input.get_input(encoder=lbdpe_encoder)]))
-    # p2 = lbdpe_pred.max()
-    # print(p2)
-    p2 = 0.5
+    lbdpe_pred = ldbpe_model.predict(np.array([ldbpe_input.get_input(encoder=lbdpe_encoder)]))
+    p2 = lbdpe_pred.max()
     print("p2 = ", p2)
     result = (p1 * p2) / ((p1 * p2) + (1 - p1) * (1 - p2))
     print("result = ", result)

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class DataItem(BaseModel):
-    timestamp: int | float
+    timestamp: float
     X: float
     Y: float
     location: str
