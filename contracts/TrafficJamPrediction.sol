@@ -157,15 +157,17 @@ contract TrafficJamPrediction {
     uint256 constant TIMESLOT_DURATION = 30 minutes;
 
     function calculateTimeslot(uint256 _timestamp) internal pure returns (uint) {
+        uint256 second = _timestamp / 1000;
         uint256 secondsInDay = 24 hours;
-        uint256 secondsSinceMidnight = _timestamp % secondsInDay;
+        uint256 secondsSinceMidnight = second % secondsInDay;
         uint256 timeslot = secondsSinceMidnight / TIMESLOT_DURATION;
         return timeslot;
     }
 
     function calculateDay(uint256 _timestamp) internal pure returns (uint) {
+        uint256 second = _timestamp / 1000;
         uint256 secondsInDay = 24 hours;
-        return _timestamp / secondsInDay;
+        return second / secondsInDay;
     }
 
     function uintToString(uint v) internal pure returns (string memory str) {
